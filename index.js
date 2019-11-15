@@ -17,6 +17,7 @@ app.get('/', (req, res, next) => {
 });
 
 const stream = new Sse();
+const streams = {};
 // DB would be used instead of 'rooms' or 'messages'
 const messages = {};
 
@@ -27,8 +28,8 @@ app.get('/stream', (req, res, next) => {
 	stream.init(req, res);
 });
 
-app.get('/rooms/:roomName', (req, res, next) => {
-	const { roomName } = request.params;
+app.get('/streams/:roomName', (req, res, next) => {
+	const { roomName } = req.params;
 	const stream = streams[roomName];
 	// const messages = {fun : ['hi', 'hi there'], room2: ['coucou']}
 	const data = messages[roomName];
@@ -46,7 +47,6 @@ function send(data) {
 app.post('/room', (req, res, next) => {
 	const { name } = req.body;
 	send(name);
-	rooms.push(name);
 	messages[name] = [];
 	streams[name] = new Sse();
 	res.send(name);
@@ -58,7 +58,7 @@ app.get('/message', (req, res, next) => {
 
 app.post('/message/:roomName', (req, res, next) => {
 	const { message } = req.body;
-	const { roomName } = request.params;
+	const { roomName } = req.params;
 	const room = messages[roomName];
 	room.push(message);
 	const stream = streams[roomName];
